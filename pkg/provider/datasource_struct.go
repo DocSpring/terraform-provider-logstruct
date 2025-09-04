@@ -6,9 +6,10 @@ import (
     "github.com/hashicorp/terraform-plugin-framework/datasource"
     "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
     "github.com/hashicorp/terraform-plugin-framework/types"
+    "github.com/hashicorp/terraform-plugin-framework/attr"
 )
 
-type structDataSource struct{}
+type structDataSource struct{ client *MetadataClient }
 
 func NewStructDataSource() datasource.DataSource { return &structDataSource{} }
 
@@ -34,14 +35,19 @@ func (d *structDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
     }
 }
 
+func (d *structDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+    if req.ProviderData == nil { return }
+    if c, ok := req.ProviderData.(*MetadataClient); ok { d.client = c }
+}
+
 func (d *structDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
     var data structDataModel
     diags := req.Config.Get(ctx, &data)
     resp.Diagnostics.Append(diags...)
     if resp.Diagnostics.HasError() { return }
 
-    client, ok := req.ProviderData.(*MetadataClient)
-    if !ok || client == nil {
+    client := d.client
+    if client == nil {
         resp.Diagnostics.AddError("Provider not configured", "Missing metadata client")
         return
     }
@@ -59,7 +65,7 @@ func (d *structDataSource) Read(ctx context.Context, req datasource.ReadRequest,
     for _, e := range allowed { data.AllowedEvents = append(data.AllowedEvents, types.StringValue(e)) }
     _ = single
     // keys map
-    kv := map[string]types.Value{}
+    kv := map[string]attr.Value{}
     for k, v := range client.Keys { kv[k] = types.StringValue(v) }
     m, md := types.MapValue(types.StringType, kv)
     resp.Diagnostics.Append(md...)
@@ -68,4 +74,3 @@ func (d *structDataSource) Read(ctx context.Context, req datasource.ReadRequest,
     diags = resp.State.Set(ctx, &data)
     resp.Diagnostics.Append(diags...)
 }
-

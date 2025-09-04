@@ -11,7 +11,7 @@ import (
     "github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type cwFilterDataSource struct{}
+type cwFilterDataSource struct{ client *MetadataClient }
 
 func NewCloudWatchFilterDataSource() datasource.DataSource { return &cwFilterDataSource{} }
 
@@ -42,14 +42,19 @@ func (d *cwFilterDataSource) Schema(_ context.Context, _ datasource.SchemaReques
     }
 }
 
+func (d *cwFilterDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, _ *datasource.ConfigureResponse) {
+    if req.ProviderData == nil { return }
+    if c, ok := req.ProviderData.(*MetadataClient); ok { d.client = c }
+}
+
 func (d *cwFilterDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
     var data cwFilterModel
     diags := req.Config.Get(ctx, &data)
     resp.Diagnostics.Append(diags...)
     if resp.Diagnostics.HasError() { return }
 
-    client, ok := req.ProviderData.(*MetadataClient)
-    if !ok || client == nil {
+    client := d.client
+    if client == nil {
         resp.Diagnostics.AddError("Provider not configured", "Missing metadata client")
         return
     }
@@ -100,4 +105,3 @@ func (d *cwFilterDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 func contains(arr []string, s string) bool { for _, v := range arr { if v == s { return true } }; return false }
 func escape(s string) string { return strings.ReplaceAll(s, "\"", "\\\"") }
-

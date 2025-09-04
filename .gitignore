@@ -1,0 +1,6 @@
+dist/
+bin/
+.terraform/
+.terraform.lock.hcl
+*.tfstate*
+**/.DS_Store

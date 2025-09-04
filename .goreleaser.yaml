@@ -1,0 +1,28 @@
+project_name: terraform-provider-logstruct
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - id: provider
+    main: ./main.go
+    binary: terraform-provider-logstruct
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    flags: ["-trimpath"]
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+archives:
+  - id: archive
+    name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    builds: [provider]
+    format: zip
+checksum:
+  name_template: '{{ .ProjectName }}_v{{ .Version }}_SHA256SUMS'
+signs:
+  - artifacts: checksum
+release:
+  draft: false
+  prerelease: auto
+  name_template: 'v{{ .Version }}'

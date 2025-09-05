@@ -55,9 +55,6 @@ func (p *logstructProvider) Configure(ctx context.Context, req fwprovider.Config
 
 func (p *logstructProvider) DataSources(context.Context) []func() datasource.DataSource {
     return []func() datasource.DataSource{
-        NewStructDataSource,
-        NewCloudWatchFilterDataSource,
-        NewFiltersDataSource,
         NewSourceDataSource,
         NewPatternDataSource,
     }

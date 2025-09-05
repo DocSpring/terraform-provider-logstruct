@@ -2,7 +2,9 @@ package provider
 
 import (
     "context"
+    "fmt"
     "sort"
+    "strings"
 
     "github.com/hashicorp/terraform-plugin-framework/datasource"
     "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -82,13 +84,29 @@ func (d *patternDataSource) Read(ctx context.Context, req datasource.ReadRequest
         return
     }
 
-    // build pattern
-    model := cwFilterModel{Struct: types.StringValue(chosen), Event: types.StringValue(ev)}
-    pat, err := generatePattern(client, model)
-    if err != nil { resp.Diagnostics.AddError("Pattern generation failed", err.Error()); return }
+    // build pattern using canonical keys
+    allowed, _, err := client.AllowedEventsForStruct(chosen)
+    if err != nil { resp.Diagnostics.AddError("Lookup error", err.Error()); return }
+    ok := false
+    for _, a := range allowed { if a == ev { ok = true; break } }
+    if !ok {
+        resp.Diagnostics.AddError("Invalid event", "event "+ev+" is not allowed for struct "+chosen)
+        return
+    }
+    evtKey, okk := client.Keys["event"]
+    if !okk { resp.Diagnostics.AddError("Missing key", "'event' key missing from catalog"); return }
+    parts := []string{fmt.Sprintf("$.%s = \"%s\"", evtKey, ev)}
+    if srcVal, fixed, err := client.FixedSourceForStruct(chosen); err == nil && fixed {
+        if srcKey, ok2 := client.Keys["source"]; ok2 {
+            parts = append(parts, fmt.Sprintf("$.%s = \"%s\"", srcKey, srcVal))
+        } else {
+            resp.Diagnostics.AddError("Missing key", "'source' key missing from catalog")
+            return
+        }
+    }
+    pat := fmt.Sprintf("{ %s }", strings.Join(parts, " && "))
     data.Pattern = types.StringValue(pat)
 
     diags = resp.State.Set(ctx, &data)
     resp.Diagnostics.Append(diags...)
 }
-

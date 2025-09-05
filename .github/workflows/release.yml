@@ -18,6 +18,24 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.22'
+      - name: Import GPG private key (for checksum signing)
+        if: ${{ secrets.GPG_PRIVATE_KEY != '' }}
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          echo "Importing GPG key"
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          # If the key has a passphrase, enable loopback so non-interactive signing can work
+          if [ -n "$GPG_PASSPHRASE" ]; then
+            echo 'pinentry-mode loopback' >> ~/.gnupg/gpg.conf
+            echo 'allow-loopback-pinentry' >> ~/.gnupg/gpg-agent.conf
+            gpg-connect-agent reloadagent /bye
+          fi
+          echo "GPG keys:"
+          gpg --list-secret-keys --keyid-format LONG
       - name: Build
         run: go build ./...
       - name: GoReleaser
@@ -27,4 +45,6 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          # If your key has a passphrase, gpg will read it via loopback pinentry
+          # GPG_TTY helps avoid certain agent warnings
+          GPG_TTY: ${{ runner.env.SSH_AUTH_SOCK }}

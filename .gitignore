@@ -4,3 +4,4 @@ bin/
 .terraform.lock.hcl
 *.tfstate*
 **/.DS_Store
+.gpg/private_gpg_key.asc

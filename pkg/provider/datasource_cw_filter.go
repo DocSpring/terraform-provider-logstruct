@@ -58,24 +58,39 @@ func (d *cwFilterDataSource) Read(ctx context.Context, req datasource.ReadReques
         resp.Diagnostics.AddError("Provider not configured", "Missing metadata client")
         return
     }
+    pattern, err := generatePattern(client, data)
+    if err != nil {
+        resp.Diagnostics.AddError("Pattern generation failed", err.Error())
+        return
+    }
+    data.Pattern = types.StringValue(pattern)
+
+    diags = resp.State.Set(ctx, &data)
+    resp.Diagnostics.Append(diags...)
+}
+
+func contains(arr []string, s string) bool { for _, v := range arr { if v == s { return true } }; return false }
+func escape(s string) string { return strings.ReplaceAll(s, "\"", "\\\"") }
+
+// generatePattern builds a CloudWatch filter pattern for the given model using the catalog client.
+func generatePattern(client *MetadataClient, data cwFilterModel) (string, error) {
     structName := data.Struct.ValueString()
     event := data.Event.ValueString()
     allowed, _, err := client.AllowedEventsForStruct(structName)
-    if err != nil { resp.Diagnostics.AddError("Lookup error", err.Error()); return }
+    if err != nil { return "", err }
     if !contains(allowed, event) {
-        resp.Diagnostics.AddError("Invalid event for struct", fmt.Sprintf("event %q not allowed for %s (allowed: %v)", event, structName, allowed))
-        return
+        return "", fmt.Errorf("event %q not allowed for %s (allowed: %v)", event, structName, allowed)
     }
     var parts []string
     // add evt
-    evtKey, ok := client.Keys["evt"]
-    if !ok { resp.Diagnostics.AddError("Missing key", "evt key missing from exports"); return }
+    evtKey, ok := client.Keys["event"]
+    if !ok { return "", fmt.Errorf("evt key missing from exports") }
     parts = append(parts, fmt.Sprintf("$.%s = \"%s\"", evtKey, event))
     // add source
     if src, fixed, err := client.FixedSourceForStruct(structName); err != nil {
-        resp.Diagnostics.AddError("Lookup error", err.Error()); return
+        return "", err
     } else if fixed {
-        srcKey, ok := client.Keys["src"]; if !ok { resp.Diagnostics.AddError("Missing key", "src key missing from exports"); return }
+        srcKey, ok := client.Keys["source"]; if !ok { return "", fmt.Errorf("src key missing from exports") }
         parts = append(parts, fmt.Sprintf("$.%s = \"%s\"", srcKey, src))
     }
     // add extra predicates
@@ -96,12 +111,5 @@ func (d *cwFilterDataSource) Read(ctx context.Context, req datasource.ReadReques
             }
         }
     }
-    pattern := fmt.Sprintf("{ %s }", strings.Join(parts, " && "))
-    data.Pattern = types.StringValue(pattern)
-
-    diags = resp.State.Set(ctx, &data)
-    resp.Diagnostics.Append(diags...)
+    return fmt.Sprintf("{ %s }", strings.Join(parts, " && ")), nil
 }
-
-func contains(arr []string, s string) bool { for _, v := range arr { if v == s { return true } }; return false }
-func escape(s string) string { return strings.ReplaceAll(s, "\"", "\\\"") }

@@ -57,6 +57,9 @@ func (p *logstructProvider) DataSources(context.Context) []func() datasource.Dat
     return []func() datasource.DataSource{
         NewStructDataSource,
         NewCloudWatchFilterDataSource,
+        NewFiltersDataSource,
+        NewSourceDataSource,
+        NewPatternDataSource,
     }
 }
 

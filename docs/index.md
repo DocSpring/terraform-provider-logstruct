@@ -36,6 +36,11 @@ resource "aws_cloudwatch_log_metric_filter" "email_delivered_count" {
 }
 ```
 
+Prefer a higher-level experience?
+- Use the AWS module to wrap AWS resources with validated patterns:
+  https://registry.terraform.io/modules/DocSpring/logstruct/aws
+  (Provider remains available for custom metrics or advanced usage.)
+
 ## Argument Reference
 
 This provider uses an embedded catalog exported from LogStruct releases, so it requires no configuration.
@@ -43,4 +48,3 @@ This provider uses an embedded catalog exported from LogStruct releases, so it r
 ## Import
 
 This provider has no importable resources.
-

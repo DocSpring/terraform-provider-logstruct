@@ -25,6 +25,9 @@ resource "aws_cloudwatch_log_metric_filter" "email_delivered_count" {
 }
 ```
 
+See also: the AWS module that wraps CloudWatch resources using this data source:
+https://registry.terraform.io/modules/DocSpring/logstruct/aws
+
 ## Argument Reference
 
 - `source` (String, Required) — Canonical source value (e.g., `mailer`, `job`).
@@ -33,4 +36,3 @@ resource "aws_cloudwatch_log_metric_filter" "email_delivered_count" {
 ## Attributes Reference
 
 - `pattern` (String) — Compiled CloudWatch filter pattern.
-

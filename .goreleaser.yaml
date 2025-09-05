@@ -5,7 +5,8 @@ before:
 builds:
   - id: provider
     main: ./main.go
-    binary: terraform-provider-logstruct
+    # Binary inside the ZIP must be versioned for Terraform Registry ingestion
+    binary: terraform-provider-logstruct_v{{ .Version }}
     env:
       - CGO_ENABLED=0
     goos: [linux, darwin, windows]

@@ -1,0 +1,198 @@
+{
+  "keys": {
+    "source": "src",
+    "event": "evt",
+    "timestamp": "ts",
+    "level": "lvl",
+    "message": "msg",
+    "data": "data",
+    "path": "path",
+    "http_method": "method",
+    "source_ip": "source_ip",
+    "user_agent": "user_agent",
+    "referer": "referer",
+    "request_id": "request_id",
+    "format": "format",
+    "controller": "controller",
+    "action": "action",
+    "status": "status",
+    "duration": "duration",
+    "view": "view",
+    "db": "db",
+    "params": "params",
+    "blocked_host": "blocked_host",
+    "blocked_hosts": "blocked_hosts",
+    "client_ip": "client_ip",
+    "x_forwarded_for": "x_forwarded_for",
+    "to": "to",
+    "from": "from",
+    "subject": "subject",
+    "err_class": "err_class",
+    "backtrace": "backtrace",
+    "job_id": "job_id",
+    "job_class": "job_class",
+    "queue_name": "queue_name",
+    "arguments": "arguments",
+    "retry_count": "retry_count",
+    "process_id": "pid",
+    "thread_id": "tid",
+    "context": "ctx",
+    "checksum": "checksum",
+    "exist": "exist",
+    "url": "url",
+    "prefix": "prefix",
+    "range": "range",
+    "storage": "storage",
+    "operation": "op",
+    "file_id": "file_id",
+    "filename": "filename",
+    "mime_type": "mime_type",
+    "size": "size",
+    "metadata": "metadata",
+    "location": "location",
+    "upload_options": "upload_opts",
+    "download_options": "download_opts",
+    "options": "opts",
+    "uploader": "uploader",
+    "model": "model",
+    "mount_point": "mount_point",
+    "sql": "sql",
+    "name": "name",
+    "row_count": "row_count",
+    "connection_adapter": "connection_adapter",
+    "bind_params": "bind_params",
+    "database_name": "database_name",
+    "connection_pool_size": "connection_pool_size",
+    "active_connections": "active_connections",
+    "operation_type": "operation_type",
+    "table_names": "table_names"
+  },
+  "structs": {
+    "ActiveModelSerializers": {
+      "name": "ActiveModelSerializers",
+      "fixed_source": "rails",
+      "allowed_events": [
+        "log"
+      ]
+    },
+    "Ahoy": {
+      "name": "Ahoy",
+      "fixed_source": null,
+      "allowed_events": [
+        "log"
+      ]
+    },
+    "SQL": {
+      "name": "SQL",
+      "fixed_source": null,
+      "allowed_events": [
+        "database"
+      ]
+    },
+    "Sidekiq": {
+      "name": "Sidekiq",
+      "fixed_source": "sidekiq",
+      "allowed_events": [
+        "log"
+      ]
+    },
+    "Shrine": {
+      "name": "Shrine",
+      "fixed_source": "shrine",
+      "allowed_events": [
+        "delete",
+        "download",
+        "exist",
+        "metadata",
+        "unknown",
+        "upload"
+      ]
+    },
+    "Security": {
+      "name": "Security",
+      "fixed_source": "security",
+      "allowed_events": [
+        "blocked_host",
+        "csrf_violation",
+        "ip_spoof"
+      ]
+    },
+    "Request": {
+      "name": "Request",
+      "fixed_source": "rails",
+      "allowed_events": [
+        "request"
+      ]
+    },
+    "Plain": {
+      "name": "Plain",
+      "fixed_source": null,
+      "allowed_events": [
+        "log"
+      ]
+    },
+    "GoodJob": {
+      "name": "GoodJob",
+      "fixed_source": "job",
+      "allowed_events": [
+        "enqueue",
+        "error",
+        "finish",
+        "log",
+        "schedule",
+        "start"
+      ]
+    },
+    "Error": {
+      "name": "Error",
+      "fixed_source": null,
+      "allowed_events": [
+        "error"
+      ]
+    },
+    "ActiveJob": {
+      "name": "ActiveJob",
+      "fixed_source": "job",
+      "allowed_events": [
+        "enqueue",
+        "finish",
+        "schedule",
+        "start"
+      ]
+    },
+    "ActiveStorage": {
+      "name": "ActiveStorage",
+      "fixed_source": "storage",
+      "allowed_events": [
+        "delete",
+        "download",
+        "exist",
+        "metadata",
+        "stream",
+        "unknown",
+        "upload",
+        "url"
+      ]
+    },
+    "ActionMailer": {
+      "name": "ActionMailer",
+      "fixed_source": "mailer",
+      "allowed_events": [
+        "delivered",
+        "delivery"
+      ]
+    },
+    "CarrierWave": {
+      "name": "CarrierWave",
+      "fixed_source": "carrierwave",
+      "allowed_events": [
+        "delete",
+        "download",
+        "exist",
+        "metadata",
+        "unknown",
+        "upload"
+      ]
+    }
+  }
+}

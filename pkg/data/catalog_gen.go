@@ -84,6 +84,8 @@ var CatalogData = Catalog{
 		"table_names": "table_names",
 	},
 	Structs: map[string]StructCatalog{
+		"ActiveModelSerializers": {Name: "ActiveModelSerializers", FixedSource: ptr("rails"), AllowedEvents: []string{"log"}},
+		"Ahoy": {Name: "Ahoy", FixedSource: nil, AllowedEvents: []string{"log"}},
 		"SQL": {Name: "SQL", FixedSource: nil, AllowedEvents: []string{"database"}},
 		"Sidekiq": {Name: "Sidekiq", FixedSource: ptr("sidekiq"), AllowedEvents: []string{"log"}},
 		"Shrine": {Name: "Shrine", FixedSource: ptr("shrine"), AllowedEvents: []string{"delete", "download", "exist", "metadata", "unknown", "upload"}},

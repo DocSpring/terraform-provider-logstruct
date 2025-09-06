@@ -3,6 +3,7 @@
 Terraform provider for LogStruct: type-safe CloudWatch filter patterns and LogStruct metadata validation at plan time.
 
 Links:
+
 - Website: https://logstruct.com/
 - LogStruct (Ruby gem): https://github.com/DocSpring/logstruct
 - Provider (this repo): https://github.com/DocSpring/terraform-provider-logstruct
@@ -46,7 +47,7 @@ terraform {
   required_providers {
     logstruct = {
       source  = "DocSpring/logstruct"
-      version = ">= 0.0.3"
+      version = ">= 0.1.0"
     }
   }
 }
@@ -80,4 +81,3 @@ See more examples at https://logstruct.com/docs/terraform.
 ## Releasing
 
 Use GoReleaser to build and publish GitHub releases with platform-specific zips and checksums. Tags must be semantic versions prefixed with `v` (e.g. `v0.1.0`).
-

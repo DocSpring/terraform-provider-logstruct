@@ -16,6 +16,7 @@ type Catalog struct {
 
 var CatalogData = Catalog{
 	Keys: map[string]string{
+		"accept": "accept",
 		"action": "action",
 		"active_connections": "active_count",
 		"adapter": "adapter",
@@ -33,6 +34,7 @@ var CatalogData = Catalog{
 		"checksum": "checksum",
 		"client_ip": "client_ip",
 		"connection_pool_size": "pool_size",
+		"content_type": "content_type",
 		"context": "ctx",
 		"controller": "controller",
 		"cron_key": "cron_key",
@@ -57,6 +59,7 @@ var CatalogData = Catalog{
 		"finished_at": "finished_at",
 		"format": "format",
 		"from": "from",
+		"host": "host",
 		"http_method": "method",
 		"job_class": "job_class",
 		"job_id": "job_id",

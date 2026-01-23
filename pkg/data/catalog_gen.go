@@ -93,7 +93,7 @@ var CatalogData = Catalog{
 		"queue_name": "queue_name",
 		"range": "range",
 		"referer": "referer",
-		"request_id": "request_id",
+		"request_id": "req_id",
 		"resource_class": "resource_class",
 		"result": "result",
 		"retries": "retries",

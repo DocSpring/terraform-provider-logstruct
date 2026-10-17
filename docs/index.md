@@ -1,9 +1,8 @@
 # LogStruct Provider
 
-The LogStruct Terraform provider offers type-safe helpers for working with LogStruct JSON logs:
-
-- Validate struct/event combinations at plan-time using the provider’s embedded catalog.
-- Generate CloudWatch Logs filter patterns without hand-writing stringly-typed expressions.
+The LogStruct Terraform provider builds CloudWatch Logs filter patterns for LogStruct's log lines, checked at plan
+time against the sources and events LogStruct writes. Its catalog of sources and events is compiled into the
+provider, from the LogStruct release with the same version number.
 
 ## Example Usage
 
@@ -12,24 +11,24 @@ terraform {
   required_providers {
     logstruct = {
       source  = "DocSpring/logstruct"
-      version = ">= 0.0.3"
+      version = "~> 0.2.0"
     }
   }
 }
 
-data "logstruct_cloudwatch_filter" "email_delivered" {
-  struct = "ActionMailer"
+data "logstruct_pattern" "email_delivered" {
+  source = "mailer"
   event  = "delivered"
 }
 
 resource "aws_cloudwatch_log_metric_filter" "email_delivered_count" {
   name           = "Email Delivered Count"
-  log_group_name = var.log_group.app
-  pattern        = data.logstruct_cloudwatch_filter.email_delivered.pattern
+  log_group_name = var.log_group_name
+  pattern        = data.logstruct_pattern.email_delivered.pattern
 
   metric_transformation {
-    name      = "app_email_delivered_count"
-    namespace = var.namespace.logs
+    name      = "mailer_delivered"
+    namespace = var.namespace
     value     = "1"
     unit      = "Count"
   }

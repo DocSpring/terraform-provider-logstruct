@@ -5,3 +5,4 @@ bin/
 *.tfstate*
 **/.DS_Store
 .gpg/private_gpg_key.asc
+/terraform-provider-logstruct

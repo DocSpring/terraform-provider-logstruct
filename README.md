@@ -1,44 +1,41 @@
 # terraform-provider-logstruct
 
-Terraform provider for LogStruct: type-safe CloudWatch filter patterns and LogStruct metadata validation at plan time.
+Terraform provider for [LogStruct](https://logstruct.com/): CloudWatch Logs filter patterns for LogStruct's log lines,
+checked at plan time against the sources and events LogStruct writes.
 
 Links:
 
-- Website: https://logstruct.com/
+- Docs: https://logstruct.com/docs/terraform
 - LogStruct (Ruby gem): https://github.com/DocSpring/logstruct
+- AWS module that wraps the CloudWatch resources: https://registry.terraform.io/modules/DocSpring/logstruct/aws
 - Provider (this repo): https://github.com/DocSpring/terraform-provider-logstruct
 
-## Features
+## How it works
 
-- Validate that a `struct` and `event` combination is valid based on LogStruct's typed definitions.
-- Generate CloudWatch Logs filter patterns without stringly-typed values.
-- Fail fast during `terraform validate/plan` if LogStruct enums/keys drift.
+The provider has a catalog of LogStruct's sources (`src`) and the events (`evt`) each one writes, compiled into the
+provider (`pkg/data/catalog.json`). Each provider release is built from the LogStruct release with the same version
+number: LogStruct's Release workflow regenerates the catalog, commits it here and tags this repository. An unknown
+source or event fails `terraform validate` and `terraform plan`.
+
+The provider has no settings and no resources.
 
 ## Data Sources
 
-### `logstruct_struct`
+### `logstruct_source`
 
-Inputs:
+Checks a source and lists its events.
 
-- `struct` (string): e.g. `"ActionMailer"`
+- `source` (String, required): a source, e.g. `mailer` or `job`.
+- `canonical` (String): the source.
+- `events` (Map of String): the source's events, keyed by themselves, for `contains(keys(...), var.event)` checks.
 
-Outputs:
+### `logstruct_pattern`
 
-- `fixed_source` (string, null if not fixed)
-- `allowed_events` (list of strings)
-- `keys` (map): canonical key names, e.g. `evt`, `src`, etc.
+Builds a CloudWatch Logs filter pattern for a source and an event.
 
-### `logstruct_cloudwatch_filter`
-
-Inputs:
-
-- `struct` (string)
-- `event` (string, serialized value as emitted by LogStruct)
-- `predicates` (map(string => list(string)), optional): additional equality clauses
-
-Outputs:
-
-- `pattern` (string): CloudWatch filter pattern `{ $.src = "mailer" && $.evt = "delivered" ... }`
+- `source` (String, required): a source, e.g. `mailer`.
+- `event` (String, required): one of the source's events, e.g. `delivered`.
+- `pattern` (String): the pattern, e.g. `{ $.src = "mailer" && $.evt = "delivered" }`.
 
 ## Installation
 
@@ -47,37 +44,39 @@ terraform {
   required_providers {
     logstruct = {
       source  = "DocSpring/logstruct"
-      version = ">= 0.1.0"
+      version = "~> 0.2.0"
     }
   }
 }
 ```
 
+Use the provider version that matches the LogStruct version your app runs.
+
 ## Example
 
 ```hcl
-data "logstruct_cloudwatch_filter" "email_delivered" {
-  struct = "ActionMailer"
+data "logstruct_pattern" "email_delivered" {
+  source = "mailer"
   event  = "delivered"
 }
 
 resource "aws_cloudwatch_log_metric_filter" "email_delivered_count" {
   name           = "Email Delivered Count"
-  log_group_name = var.log_group.docspring
-  pattern        = data.logstruct_cloudwatch_filter.email_delivered.pattern
+  log_group_name = var.log_group_name
+  pattern        = data.logstruct_pattern.email_delivered.pattern
 
   metric_transformation {
-    name          = "docspring_email_delivered_count"
-    namespace     = var.namespace.logs
-    value         = "1"
-    default_value = "0"
-    unit          = "Count"
+    name      = "mailer_delivered"
+    namespace = var.namespace
+    value     = "1"
+    unit      = "Count"
   }
 }
 ```
 
-See more examples at https://logstruct.com/docs/terraform.
+More examples: https://logstruct.com/docs/terraform
 
 ## Releasing
 
-Use GoReleaser to build and publish GitHub releases with platform-specific zips and checksums. Tags must be semantic versions prefixed with `v` (e.g. `v0.1.0`).
+Releases are tagged by LogStruct's Release workflow. A `v*` tag runs `.github/workflows/release.yml`, which builds the
+platform zips and checksums with GoReleaser and publishes them as a GitHub release.

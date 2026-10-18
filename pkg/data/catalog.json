@@ -15,6 +15,8 @@
     "bind_params": "bind_params",
     "blocked_host": "blocked_host",
     "blocked_hosts": "blocked_hosts",
+    "cause_class": "cause_class",
+    "cause_message": "cause_message",
     "checksum": "checksum",
     "client_ip": "client_ip",
     "connection_pool_size": "pool_size",
@@ -30,6 +32,7 @@
     "enqueue_caller": "enqueue_caller",
     "environment": "environment",
     "error_class": "error_class",
+    "error_context": "error_context",
     "error_message": "error_message",
     "event": "evt",
     "exception_executions": "exception_executions",
@@ -126,8 +129,12 @@
       "name": "ActiveJob",
       "fixed_source": "job",
       "allowed_events": [
+        "discard",
         "enqueue",
+        "error",
         "finish",
+        "retry",
+        "retry_stopped",
         "schedule",
         "start"
       ]
@@ -147,7 +154,6 @@
         "download",
         "exist",
         "metadata",
-        "stream",
         "upload",
         "url"
       ]
@@ -189,12 +195,8 @@
       "name": "GoodJob",
       "fixed_source": "job",
       "allowed_events": [
-        "enqueue",
         "error",
-        "finish",
-        "log",
-        "schedule",
-        "start"
+        "log"
       ]
     },
     "Plain": {
@@ -208,6 +210,7 @@
       "name": "Puma",
       "fixed_source": "puma",
       "allowed_events": [
+        "error",
         "shutdown",
         "start"
       ]
@@ -250,6 +253,7 @@
       "name": "Sidekiq",
       "fixed_source": "sidekiq",
       "allowed_events": [
+        "error",
         "log"
       ]
     }

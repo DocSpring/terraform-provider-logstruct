@@ -86,15 +86,41 @@ The release workflow signs the checksums with the `GPG_PRIVATE_KEY` repository s
 [`.gpg/public_gpg_key.asc`](.gpg/public_gpg_key.asc), with fingerprint
 `531ED8661E17EAC44124AE57BD2DE4CA3CF5BA4D`.
 
-Register this public key in the Terraform Registry under **User Settings > Signing Keys**. When rotating the signing
-key, update the repository's public key, the release secret and the Registry registration together. Keep earlier public
-keys registered so users can verify older releases.
+The current public key is already registered for the DocSpring namespace. When rotating the signing key, update the
+repository's public key, the release secret and the namespace's GPG keys together. Claimed namespaces manage keys in
+HCP Terraform under **Registry > Public namespaces > Settings**. Keep earlier public keys registered so users can
+verify older releases.
 
 After the GitHub release finishes, verify that the new version appears in the
-[Terraform Registry](https://registry.terraform.io/providers/DocSpring/logstruct/latest). If it is missing, use
-**Resync** in the provider's Registry settings. Resync also ensures the GitHub release webhook exists. Confirm the
-version is listed by the [Registry API](https://registry.terraform.io/v1/providers/DocSpring/logstruct/versions), then run
+[Terraform Registry](https://registry.terraform.io/providers/DocSpring/logstruct/latest). Claimed namespaces receive
+release events through the Terraform Cloud GitHub App; a repository webhook is not required. If a version is missing,
+check the App's repository access and the namespace's version history. Review the **Resync** preview before confirming:
+it can delete Registry versions that it cannot find on GitHub. Do not confirm a preview that would delete releases
+which still exist on GitHub. Confirm the new version is listed by the
+[Registry API](https://registry.terraform.io/v1/providers/DocSpring/logstruct/versions), then run
 `terraform init` in a configuration pinned to that version using the normal Registry installation path.
 
-See HashiCorp's [provider publishing guide](https://developer.hashicorp.com/terraform/registry/providers/publishing)
-and [Registry FAQ](https://developer.hashicorp.com/terraform/registry/faq) for signing-key and webhook requirements.
+### Registry ingestion issue
+
+As of 2026-10-21, the Registry lists versions through 0.1.12, while 0.2.0, 0.2.1 and 0.2.2 are published on GitHub.
+[HashiCorp issue #67](https://github.com/hashicorp/terraform-registry-support/issues/67) tracks the ingestion failure and
+the Resync preview that proposes removing existing versions. The current signing key is already registered. The
+absence of a repository webhook is expected for this claimed namespace, as
+[HashiCorp explains](https://github.com/hashicorp/terraform-registry-support/issues/53#issuecomment-5797889249).
+
+Provider 0.1.12 can still be installed through the Registry. Its `mailer` events match 0.2.2, and both versions generate
+the same `mailer` / `delivered` pattern and reject the invalid event `deliverd`. Pin `version = "= 0.1.12"` for that
+example while ingestion is unavailable. Other integrations have catalog changes, so this is not a substitute for
+0.2.2 when using its newer events.
+
+For 0.2.2, Terraform supports a
+[filesystem mirror](https://developer.hashicorp.com/terraform/cli/config/config-file#provider-installation). Download the
+published archive for your platform, verify its checksum against the signed SHA256SUMS, and put it under
+`<mirror>/registry.terraform.io/docspring/logstruct/`. Configure `filesystem_mirror` to include only
+`registry.terraform.io/docspring/logstruct` and exclude that address from `direct`. Keep the provider source address
+`DocSpring/logstruct` and pin `version = "= 0.2.2"`. This installation path passed `terraform init` and the valid and
+invalid mailer plans on macOS ARM64; it does not verify Registry ingestion.
+
+See HashiCorp's [namespace key management guide](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/organizations/public-namespace/manage),
+[artifact management guide](https://developer.hashicorp.com/terraform/cloud-docs/users-teams-organizations/organizations/public-namespace/artifacts)
+and [provider publishing guide](https://developer.hashicorp.com/terraform/registry/providers/publishing).

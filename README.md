@@ -81,3 +81,20 @@ See more examples at https://logstruct.com/docs/terraform.
 ## Releasing
 
 Use GoReleaser to build and publish GitHub releases with platform-specific zips and checksums. Tags must be semantic versions prefixed with `v` (e.g. `v0.1.0`).
+
+The release workflow signs the checksums with the `GPG_PRIVATE_KEY` repository secret. Its public counterpart is
+[`.gpg/public_gpg_key.asc`](.gpg/public_gpg_key.asc), with fingerprint
+`531ED8661E17EAC44124AE57BD2DE4CA3CF5BA4D`.
+
+Register this public key in the Terraform Registry under **User Settings > Signing Keys**. When rotating the signing
+key, update the repository's public key, the release secret and the Registry registration together. Keep earlier public
+keys registered so users can verify older releases.
+
+After the GitHub release finishes, verify that the new version appears in the
+[Terraform Registry](https://registry.terraform.io/providers/DocSpring/logstruct/latest). If it is missing, use
+**Resync** in the provider's Registry settings. Resync also ensures the GitHub release webhook exists. Confirm the
+version is listed by the [Registry API](https://registry.terraform.io/v1/providers/DocSpring/logstruct/versions), then run
+`terraform init` in a configuration pinned to that version using the normal Registry installation path.
+
+See HashiCorp's [provider publishing guide](https://developer.hashicorp.com/terraform/registry/providers/publishing)
+and [Registry FAQ](https://developer.hashicorp.com/terraform/registry/faq) for signing-key and webhook requirements.
